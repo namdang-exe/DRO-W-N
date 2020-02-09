@@ -122,14 +122,9 @@
         <div id="pose-label-container"></div>
         <button style="margin-top: 20px" type="button" onclick="stopPose()">Stop</button>
 
-        <h2>Audio Recognizing Model</h2>
-        <button type="button" onclick="audioInit()">Start</button>
-        <div id="audio-label-container"></div>
-        <button style="margin-top: 20px" type="button" onclick="stopAudio()">Stop</button>
-
         <h2 style="margin-top: 20%">Drowning Detection</h2>
         <video width="1920" height="1080" controls>
-<!--            <source src="videos/kangaroos.mp4" type="video/mp4">-->
+            <source src="videos/finaldive.mp4" type="video/mp4">
         </video>
 
     </div> <!-- end section-header -->
@@ -333,84 +328,6 @@
         }
     }
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
-
-
-<script type="text/javascript">
-    // more documentation available at
-    // https://github.com/tensorflow/tfjs-models/tree/master/speech-commands
-
-    // the link to your model provided by Teachable Machine export panel
-    const AUDIO_URL = "http://localhost:3000/audio_model/";
-
-    let audioRecognizer;
-
-    async function createAudioModel() {
-        const checkpointURL = AUDIO_URL + "model.json"; // model topology
-        const metadataURL = AUDIO_URL + "metadata.json"; // model metadata
-
-        const recognizer = speechCommands.create(
-            "BROWSER_FFT", // fourier transform type, not useful to change
-            undefined, // speech commands vocabulary feature, not useful for your models
-            checkpointURL,
-            metadataURL);
-
-        // check that model and metadata are loaded via HTTPS requests.
-        await recognizer.ensureModelLoaded();
-
-        return recognizer;
-    }
-
-    async function audioInit() {
-        audioRecognizer = await createAudioModel();
-        const classLabels = audioRecognizer.wordLabels(); // get class labels
-        const labelContainer = document.getElementById("audio-label-container");
-        for (let i = 0; i < classLabels.length; i++) {
-            if (labelContainer.childNodes.length < 2) {
-                labelLine = document.createElement('div');
-                labelLine.className = 'label-line';
-
-                labelBar = document.createElement("div");
-                labelBar.className = "labelbar percentage-red percentage-1";
-
-                labelText = document.createElement('span');
-                labelText.className = 'label-text';
-                labelLine.appendChild(labelText);
-                labelLine.appendChild(labelBar);
-                labelContainer.appendChild(labelLine);
-            }
-        }
-
-        // listen() takes two arguments:
-        // 1. A callback function that is invoked anytime a word is recognized.
-        // 2. A configuration object with adjustable fields
-        audioRecognizer.listen(result => {
-            const scores = result.scores; // probability of prediction for each class
-            // render the probability scores per class
-            for (let i = 0; i < classLabels.length; i++) {
-                // const classPrediction = classLabels[i] + ": " + result.scores[i].toFixed(2);
-                // labelContainer.childNodes[i].innerHTML = classPrediction;
-                let p = scores[i].toFixed(2) * 100;
-                labelContainer.childNodes[i].childNodes[0].innerHTML = classLabels[i] + ' ( ' +  p + '% )';
-                labelContainer.childNodes[i].childNodes[1].className = 'labelbar percentage-red percentage-' + p;
-            }
-        }, {
-            includeSpectrogram: true, // in case listen should return result.spectrogram
-            probabilityThreshold: 0.75,
-            invokeCallbackOnNoiseAndUnknown: true,
-            overlapFactor: 0.50 // probably want between 0.5 and 0.75. More info in README
-        });
-
-        // Stop the recognition in 5 seconds.
-        // setTimeout(() => audioRecognizer.stopListening(), 5000);
-    }
-
-    function stopAudio() {
-        audioRecognizer.stopListening();
-    }
-</script>
-
 </body>
 
 </html>
